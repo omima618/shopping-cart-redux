@@ -1,25 +1,46 @@
-import logo from './logo.svg';
-import './App.css';
-
+import { useEffect } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
+import { sendCartData } from './Store/cartActions';
+import { getCartData } from './Store/cartActions';
+import Cart from './components/Cart/Cart';
+import Layout from './components/Layout/Layout';
+import Products from './components/Shop/Products';
+import Notification from './components/UI/Notification';
+let isInitial = true;
 function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+    const dispatch = useDispatch();
+    const notification = useSelector(
+        (state) => state.notification.notification
+    );
+    const cartItems = useSelector((state) => state.cart.cartItems);
+    const cartChanged = useSelector((state) => state.cart.cartChanged);
+    // GET CURRENT DATA
+    useEffect(() => {
+        dispatch(getCartData());
+    }, []);
+    // SEND CART DATA
+    useEffect(() => {
+        if (isInitial) {
+            isInitial = false;
+            return;
+        }
+        cartChanged && dispatch(sendCartData(cartItems));
+    }, [cartItems]);
+    return (
+        <>
+            {notification && (
+                <Notification
+                    status={notification.status}
+                    title={notification.title}
+                    message={notification.message}
+                />
+            )}
+            <Layout>
+                <Cart />
+                <Products />
+            </Layout>
+        </>
+    );
 }
 
 export default App;
